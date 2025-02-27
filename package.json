@@ -63,7 +63,6 @@
     "@types/react-dom": "latest",
     "@supabase/supabase-js": "latest",
     "framer-motion": "latest",
-    "lodash": "latest",
     "@googlemaps/js-api-loader": "latest",
     "react-intersection-observer": "latest",
     "react-cookie": "latest"
