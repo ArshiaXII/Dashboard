@@ -8,22 +8,26 @@ export async function GET(request: Request) {
   const offset = (page - 1) * limit
   const status = searchParams.get("status")
 
-  let query = supabase.from("blog_posts").select("*", { count: "exact" })
+  let query = supabase.from("inquiries").select(
+    `
+      *,
+      properties (id, title)
+    `,
+    { count: "exact" },
+  )
 
   if (status) {
     query = query.eq("status", status)
   }
 
-  const { data, error, count } = await query
-    .order("publish_date", { ascending: false })
-    .range(offset, offset + limit - 1)
+  const { data, error, count } = await query.order("created_at", { ascending: false }).range(offset, offset + limit - 1)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
   return NextResponse.json({
-    posts: data,
+    inquiries: data,
     totalCount: count,
     page,
     limit,
@@ -31,19 +35,17 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const newPost = await request.json()
+  const newInquiry = await request.json()
 
   const { data, error } = await supabase
-    .from("blog_posts")
+    .from("inquiries")
     .insert({
-      title: newPost.title,
-      content: newPost.content,
-      author: newPost.author,
-      publish_date: newPost.publish_date || new Date().toISOString(),
-      status: newPost.status || "draft",
-      featured_image: newPost.featured_image,
-      slug: newPost.slug,
-      excerpt: newPost.excerpt,
+      name: newInquiry.name,
+      email: newInquiry.email,
+      phone: newInquiry.phone,
+      message: newInquiry.message,
+      property_id: newInquiry.property_id,
+      status: "new",
       created_at: new Date().toISOString(),
     })
     .select()
