@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Phone, PhoneIcon as WhatsApp, Menu } from "lucide-react"
+import { usePathname } from "next/navigation"
+import { Phone, PhoneIcon as WhatsApp, Menu, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { useLanguage } from "@/contexts/LanguageContext"
@@ -11,8 +12,10 @@ import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
 export function Header() {
+  const [isScrolled, setIsScrolled] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { t } = useLanguage()
+  const pathname = usePathname()
 
   const menuItems = [
     { href: "/catalog", label: t("catalog") },
@@ -23,27 +26,40 @@ export function Header() {
     { href: "/contact", label: t("contact") },
   ]
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50)
+    }
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "bg-white shadow-md py-2" : "bg-transparent py-4"}`}
+    >
       {/* Top Bar - Hidden on mobile, visible on tablet and up */}
-      <div className="hidden sm:block bg-gray-100 py-2">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between">
+      <div className="hidden md:block bg-gray-100 py-2 px-4">
+        <div className="container mx-auto">
+          <div className="flex items-center justify-between text-sm">
             <div className="flex items-center space-x-4">
               <LanguageSwitcher />
-              <span className="text-sm text-gray-600">|</span>
-              <Button variant="outline" size="sm" asChild className="ml-4">
+              <span className="text-gray-400">|</span>
+              <Button variant="ghost" size="sm" asChild className="hover:text-primary transition-colors">
                 <Link href="/login">Log In</Link>
               </Button>
             </div>
-            <div className="flex items-center space-x-4">
-              <a href="tel:+902423245494" className="text-sm text-gray-600 hover:text-primary flex items-center">
+            <div className="flex items-center space-x-6">
+              <a
+                href="tel:+902423245494"
+                className="text-gray-600 hover:text-primary transition-colors flex items-center"
+              >
                 <Phone className="h-4 w-4 mr-2" />
                 <span>+90 242 324 54 94</span>
               </a>
               <a
                 href="https://wa.me/905322124590"
-                className="text-sm text-gray-600 hover:text-primary flex items-center"
+                className="text-gray-600 hover:text-primary transition-colors flex items-center"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -56,103 +72,116 @@ export function Header() {
       </div>
 
       {/* Main Navigation */}
-      <div className="border-b">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <Link href="/" className="flex-shrink-0">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-YrmtHArqFMEzPzgCTB1qGyCGUs18aV.png"
-                alt="TurqaEstate Logo"
-                width={150}
-                height={30}
-                className="h-6 sm:h-8 w-auto"
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="flex-shrink-0 transition-transform duration-300 hover:scale-105">
+            <Image
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-YrmtHArqFMEzPzgCTB1qGyCGUs18aV.png"
+              alt="TurqaEstate Logo"
+              width={150}
+              height={30}
+              className="h-8 w-auto"
+            />
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center space-x-6">
+            {menuItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`text-sm font-medium hover:text-primary transition-colors pb-2 border-b-2 ${
+                  pathname === item.href ? "border-primary text-primary" : "border-transparent"
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Desktop Search and Schedule */}
+          <div className="hidden lg:flex items-center space-x-4">
+            <div className="relative">
+              <Input
+                type="search"
+                placeholder={t("searchProperties")}
+                className="w-64 pl-10 pr-4 py-2 rounded-full border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
               />
-            </Link>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-8">
-              {menuItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="text-sm font-medium hover:text-red-600 transition-colors"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-
-            {/* Mobile Contact Icons */}
-            <div className="flex items-center space-x-3 sm:hidden">
-              <a href="tel:+902423245494" className="text-gray-600 hover:text-primary">
-                <Phone className="h-5 w-5" />
-              </a>
-              <a
-                href="https://wa.me/905322124590"
-                className="text-gray-600 hover:text-primary"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <WhatsApp className="h-5 w-5" />
-              </a>
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             </div>
+            <Button
+              size="sm"
+              className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-full shadow-md transition-all duration-300 hover:shadow-lg"
+            >
+              {t("scheduleViewing")}
+            </Button>
+          </div>
 
-            {/* Desktop Search and Schedule */}
-            <div className="hidden sm:flex items-center space-x-4">
-              <Input type="search" placeholder={t("searchProperties")} className="w-48 h-8 text-sm" />
-              <Button
-                size="sm"
-                className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-[4px] shadow-sm"
-              >
-                {t("scheduleViewing")}
+          {/* Mobile Menu Button */}
+          <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="lg:hidden">
+                <Menu className="h-6 w-6" />
               </Button>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden ml-2 rounded-[4px]">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[80vw] sm:w-[400px] p-0">
-                <div className="flex flex-col h-full">
-                  {/* Mobile Menu Header */}
-                  <div className="p-4 border-b">
-                    <LanguageSwitcher />
-                  </div>
-
-                  {/* Mobile Menu Items */}
-                  <div className="flex-1 overflow-auto py-4">
-                    <nav className="px-4 space-y-4">
-                      {menuItems.map((item) => (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          className="block text-base font-medium hover:text-red-600 transition-colors py-2"
-                        >
-                          {item.label}
-                        </Link>
-                      ))}
-                      <Link
-                        href="/auth"
-                        className="block text-base font-medium hover:text-red-600 transition-colors py-2"
-                      >
-                        {t("login")}
-                      </Link>
-                    </nav>
-                  </div>
-
-                  {/* Mobile Menu Footer */}
-                  <div className="p-4 border-t space-y-4">
-                    <Input type="search" placeholder={t("searchProperties")} className="w-full" />
-                    <Button className="w-full bg-red-600 hover:bg-red-700">{t("scheduleViewing")}</Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-white">
+              <div className="flex flex-col h-full">
+                <div className="flex items-center justify-between mb-8 pt-4">
+                  <Image
+                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-YrmtHArqFMEzPzgCTB1qGyCGUs18aV.png"
+                    alt="TurqaEstate Logo"
+                    width={120}
+                    height={24}
+                    className="h-6 w-auto"
+                  />
+                  <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(false)}>
+                    <Menu className="h-6 w-6" />
+                  </Button>
+                </div>
+                <nav className="flex flex-col space-y-4">
+                  {menuItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`text-lg font-medium hover:text-primary transition-colors ${
+                        pathname === item.href ? "text-primary" : "text-gray-600"
+                      }`}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                  <Link
+                    href="/auth"
+                    className="text-lg font-medium text-gray-600 hover:text-primary transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {t("login")}
+                  </Link>
+                </nav>
+                <div className="mt-auto space-y-4 py-4">
+                  <Input type="search" placeholder={t("searchProperties")} className="w-full" />
+                  <Button className="w-full bg-primary hover:bg-primary-dark text-white">{t("scheduleViewing")}</Button>
+                  <div className="flex flex-col space-y-2 text-sm text-gray-600">
+                    <a href="tel:+902423245494" className="flex items-center">
+                      <Phone className="h-4 w-4 mr-2" />
+                      <span>+90 242 324 54 94</span>
+                    </a>
+                    <a
+                      href="https://wa.me/905322124590"
+                      className="flex items-center"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <WhatsApp className="h-4 w-4 mr-2" />
+                      <span>+90 532 212 45 90</span>
+                    </a>
                   </div>
                 </div>
-              </SheetContent>
-            </Sheet>
-          </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>

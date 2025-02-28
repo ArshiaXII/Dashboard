@@ -3,41 +3,44 @@
 import type React from "react"
 import { createContext, useState, useContext, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 
 interface AuthContextType {
-  user: string | null
+  user: any | null
   login: (email: string, password: string) => Promise<void>
-  logout: () => void
+  logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<string | null>(null)
+  const [user, setUser] = useState<any | null>(null)
   const router = useRouter()
+  const supabase = createClientComponentClient()
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user")
-    if (storedUser) {
-      setUser(JSON.parse(storedUser))
-    }
-  }, [])
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        setUser(session.user)
+      } else {
+        setUser(null)
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [supabase.auth])
 
   const login = async (email: string, password: string) => {
-    // In a real application, you would validate credentials against your backend
-    if (email === "admin@example.com" && password === "password") {
-      const userData = { email }
-      setUser(userData.email)
-      localStorage.setItem("user", JSON.stringify(userData.email))
-    } else {
-      throw new Error("Invalid credentials")
-    }
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) throw error
   }
 
-  const logout = () => {
-    setUser(null)
-    localStorage.removeItem("user")
-    router.push("/login")
+  const logout = async () => {
+    const { error } = await supabase.auth.signOut()
+    if (error) throw error
+    router.push("/admin/login")
   }
 
   return <AuthContext.Provider value={{ user, login, logout }}>{children}</AuthContext.Provider>

@@ -65,6 +65,7 @@
     "framer-motion": "latest",
     "@googlemaps/js-api-loader": "latest",
     "react-intersection-observer": "latest",
+    "@supabase/auth-helpers-nextjs": "latest",
     "react-cookie": "latest"
   },
   "devDependencies": {
