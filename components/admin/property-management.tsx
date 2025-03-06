@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Plus, Search, Filter, Edit, Trash2, Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -28,57 +28,128 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from "@/components/ui/dialog"
-
-// Sample property data
-const sampleProperties = [
-  {
-    id: "1",
-    title: "Luxury Villa with Sea View",
-    location: "Antalya",
-    price: 450000,
-    bedrooms: 4,
-    bathrooms: 3,
-    area: 250,
-    type: "Villa",
-    status: "For Sale",
-    featured: true,
-    createdAt: "2023-10-15"
-  },
-  {
-    id: "2",
-    title: "Modern Apartment in City Center",
-    location: "Alanya",
-    price: 180000,
-    bedrooms: 2,
-    bathrooms: 1,
-    area: 120,
-    type: "Apartment",
-    status: "For Sale",
-    featured: false,
-    createdAt: "2023-11-02"
-  },
-  {
-    id: "3",
-    title: "Beachfront Penthouse",
-    location: "Kemer",
-    price: 650000,
-    bedrooms: 3,
-    bathrooms: 2,
-    area: 200,
-    type: "Penthouse",
-    status: "For Sale",
-    featured: true,
-    createdAt: "2023-09-28"
-  }
-]
+import { toast } from "@/components/ui/use-toast"
 
 export function PropertyManagement() {
-  const [properties, setProperties] = useState(sampleProperties)
+  const [properties, setProperties] = useState([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
-  const [isAddingProperty, setIsAddingProperty] = useState(false)
-  const [editingProperty, setEditingProperty] = useState<any>(null)
-  const [viewingProperty, setViewingProperty] = useState<any>(null)
+  const [addingProperty, setAddingProperty] = useState(false)
+  const [editingProperty, setEditingProperty] = useState(null)
+  const [viewingProperty, setViewingProperty] = useState(null)
+  const [refreshKey, setRefreshKey] = useState(0)
+
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch('/api/properties')
+        const data = await response.json()
+        setProperties(data)
+      } catch (error) {
+        console.error('Error fetching properties:', error)
+        toast({
+          title: "Error",
+          description: "Failed to load properties",
+          variant: "destructive"
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchProperties()
+  }, [refreshKey])
+
+  const handleAddProperty = async (propertyData) => {
+    try {
+      const response = await fetch('/api/properties', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(propertyData),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to add property')
+      }
+
+      setAddingProperty(false)
+      setRefreshKey(prev => prev + 1)
+      toast({
+        title: "Success",
+        description: "Property added successfully",
+      })
+    } catch (error) {
+      console.error('Error adding property:', error)
+      toast({
+        title: "Error",
+        description: "Failed to add property",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const handleUpdateProperty = async (propertyData) => {
+    try {
+      const response = await fetch(`/api/properties/${propertyData.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(propertyData),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update property')
+      }
+
+      setEditingProperty(null)
+      setRefreshKey(prev => prev + 1)
+      toast({
+        title: "Success",
+        description: "Property updated successfully",
+      })
+    } catch (error) {
+      console.error('Error updating property:', error)
+      toast({
+        title: "Error",
+        description: "Failed to update property",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const handleDeleteProperty = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this property?')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/properties/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete property')
+      }
+
+      setRefreshKey(prev => prev + 1)
+      toast({
+        title: "Success",
+        description: "Property deleted successfully",
+      })
+    } catch (error) {
+      console.error('Error deleting property:', error)
+      toast({
+        title: "Error",
+        description: "Failed to delete property",
+        variant: "destructive"
+      })
+    }
+  }
 
   const filteredProperties = properties.filter(property => {
     const matchesSearch = property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -89,48 +160,23 @@ export function PropertyManagement() {
     return matchesSearch && matchesStatus
   })
 
-  const handleAddProperty = (newProperty: any) => {
-    setProperties([
-      ...properties,
-      {
-        ...newProperty,
-        id: (properties.length + 1).toString(),
-        createdAt: new Date().toISOString().split('T')[0]
-      }
-    ])
-    setIsAddingProperty(false)
-  }
-
-  const handleEditProperty = (updatedProperty: any) => {
-    setProperties(properties.map(property => 
-      property.id === updatedProperty.id ? updatedProperty : property
-    ))
-    setEditingProperty(null)
-  }
-
-  const handleDeleteProperty = (id: string) => {
-    if (confirm("Are you sure you want to delete this property?")) {
-      setProperties(properties.filter(property => property.id !== id))
-    }
-  }
-
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-bold text-[#003366]">Property Management</h2>
-        <Button onClick={() => setIsAddingProperty(true)} className="bg-[#003366]">
+        <Button onClick={() => setAddingProperty(true)} className="bg-[#003366]">
           <Plus className="mr-2 h-4 w-4" /> Add Property
         </Button>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
             placeholder="Search properties..."
+            className="pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
           />
         </div>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
@@ -146,134 +192,183 @@ export function PropertyManagement() {
         </Select>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Price (€)</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Featured</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredProperties.length > 0 ? (
-              filteredProperties.map((property) => (
-                <TableRow key={property.id}>
-                  <TableCell className="font-medium">{property.title}</TableCell>
-                  <TableCell>{property.location}</TableCell>
-                  <TableCell>{property.price.toLocaleString()}</TableCell>
-                  <TableCell>{property.type}</TableCell>
-                  <TableCell>
-                    <Badge variant={property.status === "For Sale" ? "default" : property.status === "For Rent" ? "secondary" : "outline"}>
-                      {property.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{property.featured ? "Yes" : "No"}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => setViewingProperty(property)}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => setEditingProperty(property)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDeleteProperty(property.id)}>
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </div>
+      {loading ? (
+        <div className="text-center py-8">Loading properties...</div>
+      ) : (
+        <div className="border rounded-lg overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Title</TableHead>
+                <TableHead>Location</TableHead>
+                <TableHead>Price</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredProperties.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                    No properties found
                   </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-6 text-gray-500">
-                  No properties found. Try adjusting your search or filters.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              ) : (
+                filteredProperties.map((property) => (
+                  <TableRow key={property._id}>
+                    <TableCell className="font-medium">{property.title}</TableCell>
+                    <TableCell>{property.location}</TableCell>
+                    <TableCell>€{property.price.toLocaleString()}</TableCell>
+                    <TableCell>{property.type}</TableCell>
+                    <TableCell>
+                      <Badge
+                        className={
+                          property.status === "For Sale"
+                            ? "bg-blue-100 text-blue-800"
+                            : property.status === "For Rent"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-800"
+                        }
+                      >
+                        {property.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setViewingProperty(property)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setEditingProperty(property)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDeleteProperty(property._id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      )}
 
       {/* Add Property Dialog */}
-      <Dialog open={isAddingProperty} onOpenChange={setIsAddingProperty}>
-        <DialogContent className="max-w-3xl">
+      <Dialog open={addingProperty} onOpenChange={setAddingProperty}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add New Property</DialogTitle>
           </DialogHeader>
-          <PropertyForm onSubmit={handleAddProperty} onCancel={() => setIsAddingProperty(false)} />
+          <PropertyForm
+            onSubmit={handleAddProperty}
+            onCancel={() => setAddingProperty(false)}
+          />
         </DialogContent>
       </Dialog>
 
       {/* Edit Property Dialog */}
-      <Dialog open={!!editingProperty} onOpenChange={(open) => !open && setEditingProperty(null)}>
-        <DialogContent className="max-w-3xl">
+      <Dialog open={!!editingProperty} onOpenChange={() => setEditingProperty(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Property</DialogTitle>
           </DialogHeader>
           {editingProperty && (
-            <PropertyForm 
-              property={editingProperty} 
-              onSubmit={handleEditProperty} 
-              onCancel={() => setEditingProperty(null)} 
+            <PropertyForm
+              property={editingProperty}
+              onSubmit={handleUpdateProperty}
+              onCancel={() => setEditingProperty(null)}
             />
           )}
         </DialogContent>
       </Dialog>
 
       {/* View Property Dialog */}
-      <Dialog open={!!viewingProperty} onOpenChange={(open) => !open && setViewingProperty(null)}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Property Details</DialogTitle>
-          </DialogHeader>
+      <Dialog open={!!viewingProperty} onOpenChange={() => setViewingProperty(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           {viewingProperty && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
-              <div>
-                <div className="aspect-video bg-gray-200 rounded-lg mb-4 flex items-center justify-center text-gray-500">
-                  Property Image Placeholder
+            <div>
+              <DialogHeader>
+                <DialogTitle>{viewingProperty.title}</DialogTitle>
+              </DialogHeader>
+              <div className="mt-6 space-y-6">
+                <div className="aspect-video relative rounded-lg overflow-hidden">
+                  {viewingProperty.images && viewingProperty.images.length > 0 ? (
+                    <img
+                      src={viewingProperty.images[0]}
+                      alt={viewingProperty.title}
+                      className="object-cover w-full h-full"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <p className="text-gray-500">No image available</p>
+                    </div>
+                  )}
+                  <Badge
+                    className={`absolute top-4 left-4 ${
+                      viewingProperty.status === "For Sale"
+                        ? "bg-blue-100 text-blue-800"
+                        : viewingProperty.status === "For Rent"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-gray-100 text-gray-800"
+                    }`}
+                  >
+                    {viewingProperty.status}
+                  </Badge>
                 </div>
-                <h3 className="text-xl font-bold">{viewingProperty.title}</h3>
-                <p className="text-gray-500">{viewingProperty.location}</p>
-                <div className="mt-4">
-                  <Badge variant="outline" className="mr-2">{viewingProperty.type}</Badge>
-                  <Badge>{viewingProperty.status}</Badge>
-                  {viewingProperty.featured && <Badge variant="secondary" className="ml-2">Featured</Badge>}
-                </div>
-              </div>
-              <div className="space-y-4">
+                
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500">Price</h4>
-                  <p className="text-lg font-bold">€{viewingProperty.price.toLocaleString()}</p>
+                  <h3 className="text-lg font-medium text-gray-900">Description</h3>
+                  <p className="mt-2 text-gray-600">{viewingProperty.description}</p>
                 </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-500">Bedrooms</h4>
-                    <p>{viewingProperty.bedrooms}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-500">Bathrooms</h4>
-                    <p>{viewingProperty.bathrooms}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-500">Area</h4>
-                    <p>{viewingProperty.area} m²</p>
-                  </div>
-                </div>
+                
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500">Created At</h4>
-                  <p>{viewingProperty.createdAt}</p>
+                  <h3 className="text-lg font-medium text-gray-900">Details</h3>
+                  <div className="mt-2 grid grid-cols-3 gap-4">
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Price</h4>
+                      <p>€{viewingProperty.price.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Location</h4>
+                      <p>{viewingProperty.location}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Type</h4>
+                      <p>{viewingProperty.type}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Bedrooms</h4>
+                      <p>{viewingProperty.bedrooms}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Bathrooms</h4>
+                      <p>{viewingProperty.bathrooms}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Area</h4>
+                      <p>{viewingProperty.area} m²</p>
+                    </div>
+                  </div>
                 </div>
+                
                 <div className="pt-4">
                   <Button variant="outline" onClick={() => setEditingProperty(viewingProperty)} className="mr-2">
                     <Edit className="mr-2 h-4 w-4" /> Edit
                   </Button>
                   <Button variant="destructive" onClick={() => {
-                    handleDeleteProperty(viewingProperty.id);
+                    handleDeleteProperty(viewingProperty._id);
                     setViewingProperty(null);
                   }}>
                     <Trash2 className="mr-2 h-4 w-4" /> Delete
