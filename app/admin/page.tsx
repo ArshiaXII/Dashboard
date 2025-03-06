@@ -1,82 +1,172 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Head from "next/head"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Building, Users, FileText, Activity, MoreHorizontal, Plus, Search } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { useToast } from "@/components/ui/use-toast"
+import { useAuth } from "@/contexts/AuthContext"
+import { PropertyManagement } from "@/components/admin/property-management"
+import { 
+  LayoutDashboard, 
+  Building, 
+  FileText, 
+  Settings, 
+  Users, 
+  MessageSquare,
+  TrendingUp,
+  Home,
+  DollarSign,
+  UserCheck
+} from "lucide-react"
 
-interface DashboardStat {
-  name: string
-  value: string
-  icon: React.ElementType
-  change: string
-  changeType: "positive" | "negative"
+// Dashboard Overview Component
+function DashboardOverview() {
+  return (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-[#003366]">Dashboard Overview</h2>
+      
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
+              <Home className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Total Properties</p>
+              <h3 className="text-2xl font-bold">24</h3>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center text-sm">
+            <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
+            <span className="text-green-500 font-medium">12%</span>
+            <span className="text-gray-500 ml-1">from last month</span>
+          </div>
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+              <DollarSign className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Total Sales</p>
+              <h3 className="text-2xl font-bold">€2.4M</h3>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center text-sm">
+            <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
+            <span className="text-green-500 font-medium">8%</span>
+            <span className="text-gray-500 ml-1">from last month</span>
+          </div>
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
+              <MessageSquare className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">New Inquiries</p>
+              <h3 className="text-2xl font-bold">18</h3>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center text-sm">
+            <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
+            <span className="text-green-500 font-medium">24%</span>
+            <span className="text-gray-500 ml-1">from last month</span>
+          </div>
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-amber-100 text-amber-600 mr-4">
+              <UserCheck className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Site Visitors</p>
+              <h3 className="text-2xl font-bold">1,240</h3>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center text-sm">
+            <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
+            <span className="text-green-500 font-medium">18%</span>
+            <span className="text-gray-500 ml-1">from last month</span>
+          </div>
+        </div>
+      </div>
+      
+      {/* Recent Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <h3 className="text-lg font-medium mb-4">Recent Properties</h3>
+          <div className="space-y-4">
+            {[
+              { title: "Luxury Villa with Sea View", location: "Antalya", price: "€450,000", date: "2 days ago" },
+              { title: "Modern Apartment in City Center", location: "Alanya", price: "€180,000", date: "5 days ago" },
+              { title: "Beachfront Penthouse", location: "Kemer", price: "€650,000", date: "1 week ago" },
+              { title: "Family Home with Garden", location: "Side", price: "€320,000", date: "2 weeks ago" }
+            ].map((property, index) => (
+              <div key={index} className="flex items-center justify-between border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                <div>
+                  <h4 className="font-medium">{property.title}</h4>
+                  <p className="text-sm text-gray-500">{property.location} • {property.price}</p>
+                </div>
+                <span className="text-xs text-gray-400">{property.date}</span>
+              </div>
+            ))}
+          </div>
+          <Button variant="link" className="mt-4 text-[#003366]">
+            View all properties
+          </Button>
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <h3 className="text-lg font-medium mb-4">Recent Inquiries</h3>
+          <div className="space-y-4">
+            {[
+              { name: "John Smith", property: "Luxury Villa with Sea View", email: "john@example.com", date: "1 day ago" },
+              { name: "Emma Johnson", property: "Modern Apartment in City Center", email: "emma@example.com", date: "3 days ago" },
+              { name: "Michael Brown", property: "Beachfront Penthouse", email: "michael@example.com", date: "6 days ago" },
+              { name: "Sophia Williams", property: "Family Home with Garden", email: "sophia@example.com", date: "1 week ago" }
+            ].map((inquiry, index) => (
+              <div key={index} className="flex items-center justify-between border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                <div>
+                  <h4 className="font-medium">{inquiry.name}</h4>
+                  <p className="text-sm text-gray-500">{inquiry.property}</p>
+                  <p className="text-xs text-gray-400">{inquiry.email}</p>
+                </div>
+                <span className="text-xs text-gray-400">{inquiry.date}</span>
+              </div>
+            ))}
+          </div>
+          <Button variant="link" className="mt-4 text-[#003366]">
+            View all inquiries
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
 }
-
-const initialStats: DashboardStat[] = [
-  {
-    name: "Total Properties",
-    value: "245",
-    icon: Building,
-    change: "+4.75%",
-    changeType: "positive",
-  },
-  {
-    name: "Active Users",
-    value: "2,340",
-    icon: Users,
-    change: "+11.4%",
-    changeType: "positive",
-  },
-  {
-    name: "Blog Posts",
-    value: "42",
-    icon: FileText,
-    change: "+6.2%",
-    changeType: "positive",
-  },
-  {
-    name: "Site Traffic",
-    value: "12.5K",
-    icon: Activity,
-    change: "+12.3%",
-    changeType: "positive",
-  },
-]
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard")
-  const [stats, setStats] = useState<DashboardStat[]>([])
-  const { toast } = useToast()
+  const { logout } = useAuth()
 
-  useEffect(() => {
-    setStats(initialStats)
-  }, [])
+  const handleLogout = async () => {
+    await logout()
+    document.cookie = "auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
+    window.location.href = "/admin/login"
+  }
 
-  const handleLogout = () => {
-    // Implement logout logic here
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out.",
-    })
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "properties":
+        return <PropertyManagement />
+      case "dashboard":
+        return <DashboardOverview />
+      default:
+        return <div className="p-6 text-center text-gray-500">This section is under development.</div>
+    }
   }
 
   return (
@@ -99,380 +189,111 @@ export default function AdminDashboard() {
             </Button>
           </div>
         </header>
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-            <TabsList className="bg-white p-1 rounded-lg shadow-sm">
-              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-              <TabsTrigger value="listings">Listings</TabsTrigger>
-              <TabsTrigger value="blog">Blog</TabsTrigger>
-              <TabsTrigger value="site-content">Site Content</TabsTrigger>
-              <TabsTrigger value="help">Help</TabsTrigger>
-            </TabsList>
-            <TabsContent value="dashboard">
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                {stats.map((stat) => (
-                  <Card key={stat.name}>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">{stat.name}</CardTitle>
-                      <stat.icon className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{stat.value}</div>
-                      <p className={cn("text-xs", stat.changeType === "positive" ? "text-green-600" : "text-red-600")}>
-                        {stat.change}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-            <TabsContent value="listings">
-              <ListingsManager />
-            </TabsContent>
-            <TabsContent value="blog">
-              <BlogManager />
-            </TabsContent>
-            <TabsContent value="site-content">
-              <SiteContentManager />
-            </TabsContent>
-            <TabsContent value="help">
-              <HelpSection />
-            </TabsContent>
-          </Tabs>
-        </main>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* Sidebar Navigation */}
+            <div className="w-full md:w-64 bg-white rounded-lg shadow-sm">
+              <nav className="p-4">
+                <ul className="space-y-2">
+                  <li>
+                    <button
+                      onClick={() => setActiveTab("dashboard")}
+                      className={`w-full flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
+                        activeTab === "dashboard"
+                          ? "bg-[#003366] text-white"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      <LayoutDashboard className="mr-3 h-5 w-5" />
+                      Dashboard
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => setActiveTab("properties")}
+                      className={`w-full flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
+                        activeTab === "properties"
+                          ? "bg-[#003366] text-white"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      <Building className="mr-3 h-5 w-5" />
+                      Properties
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => setActiveTab("blog")}
+                      className={`w-full flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
+                        activeTab === "blog"
+                          ? "bg-[#003366] text-white"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      <FileText className="mr-3 h-5 w-5" />
+                      Blog Posts
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => setActiveTab("inquiries")}
+                      className={`w-full flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
+                        activeTab === "inquiries"
+                          ? "bg-[#003366] text-white"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      <MessageSquare className="mr-3 h-5 w-5" />
+                      Inquiries
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => setActiveTab("users")}
+                      className={`w-full flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
+                        activeTab === "users"
+                          ? "bg-[#003366] text-white"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      <Users className="mr-3 h-5 w-5" />
+                      Users
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => setActiveTab("settings")}
+                      className={`w-full flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
+                        activeTab === "settings"
+                          ? "bg-[#003366] text-white"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      <Settings className="mr-3 h-5 w-5" />
+                      Settings
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+
+            {/* Main Content */}
+            <div className="flex-1 bg-white rounded-lg shadow-sm p-6">
+              {renderTabContent()}
+            </div>
+          </div>
+        </div>
+
+        <footer className="bg-white mt-8 py-6 border-t">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p className="text-center text-sm text-gray-500">
+              &copy; {new Date().getFullYear()} Turqa Estate. All rights reserved.
+            </p>
+          </div>
+        </footer>
       </div>
     </>
-  )
-}
-
-function ListingsManager() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const { toast } = useToast()
-
-  const handleAddProperty = () => {
-    // Implement add property logic here
-    toast({
-      title: "Add Property",
-      description: "Add property functionality to be implemented.",
-    })
-  }
-
-  const handleEditProperty = (id: string) => {
-    // Implement edit property logic here
-    toast({
-      title: "Edit Property",
-      description: `Edit property functionality to be implemented for ID: ${id}`,
-    })
-  }
-
-  const handleDeleteProperty = (id: string) => {
-    // Implement delete property logic here
-    toast({
-      title: "Delete Property",
-      description: `Delete property functionality to be implemented for ID: ${id}`,
-    })
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-[#003366]">Property Listings</h2>
-        <Button className="bg-[#003366] hover:bg-[#004080]" onClick={handleAddProperty}>
-          <Plus className="mr-2 h-4 w-4" /> Add New Property
-        </Button>
-      </div>
-      <div className="flex items-center space-x-2">
-        <Search className="h-5 w-5 text-gray-400" />
-        <Input
-          placeholder="Search properties..."
-          className="max-w-sm"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow>
-                <TableCell className="font-medium">Luxury Villa</TableCell>
-                <TableCell>$1,500,000</TableCell>
-                <TableCell>Beachfront</TableCell>
-                <TableCell>Active</TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => handleEditProperty("1")}>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>View</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleDeleteProperty("1")}>Delete</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
-function BlogManager() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const { toast } = useToast()
-
-  const handleAddPost = () => {
-    // Implement add blog post logic here
-    toast({
-      title: "Add Blog Post",
-      description: "Add blog post functionality to be implemented.",
-    })
-  }
-
-  const handleEditPost = (id: string) => {
-    // Implement edit blog post logic here
-    toast({
-      title: "Edit Blog Post",
-      description: `Edit blog post functionality to be implemented for ID: ${id}`,
-    })
-  }
-
-  const handleDeletePost = (id: string) => {
-    // Implement delete blog post logic here
-    toast({
-      title: "Delete Blog Post",
-      description: `Delete blog post functionality to be implemented for ID: ${id}`,
-    })
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-[#003366]">Blog Posts</h2>
-        <Button className="bg-[#003366] hover:bg-[#004080]" onClick={handleAddPost}>
-          <Plus className="mr-2 h-4 w-4" /> Add New Post
-        </Button>
-      </div>
-      <div className="flex items-center space-x-2">
-        <Search className="h-5 w-5 text-gray-400" />
-        <Input
-          placeholder="Search blog posts..."
-          className="max-w-sm"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Author</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow>
-                <TableCell className="font-medium">Top 10 Luxury Properties</TableCell>
-                <TableCell>John Doe</TableCell>
-                <TableCell>2023-05-15</TableCell>
-                <TableCell>Published</TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => handleEditPost("1")}>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>View</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleDeletePost("1")}>Delete</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
-function SiteContentManager() {
-  const [content, setContent] = useState({
-    welcomeMessage: "Welcome to Turqa Estate, your gateway to luxury living in Turkey.",
-    aboutUs:
-      "Turqa Estate is a premier real estate agency specializing in luxury properties across Turkey's most desirable locations.",
-    contactInfo: "Email: info@turqaestate.com\nPhone: +90 123 456 7890\nAddress: 123 Luxury Lane, Istanbul, Turkey",
-  })
-  const { toast } = useToast()
-
-  const handleContentChange = (field: string, value: string) => {
-    setContent((prevContent) => ({
-      ...prevContent,
-      [field]: value,
-    }))
-  }
-
-  const handleSaveChanges = () => {
-    // Implement save changes logic here
-    toast({
-      title: "Save Changes",
-      description: "Site content changes saved successfully.",
-    })
-  }
-
-  return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-[#003366]">Site Content</h2>
-      <Card>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="welcome-message">Homepage Welcome Message</Label>
-            <Textarea
-              id="welcome-message"
-              placeholder="Enter welcome message"
-              value={content.welcomeMessage}
-              onChange={(e) => handleContentChange("welcomeMessage", e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="about-us">About Us</Label>
-            <Textarea
-              id="about-us"
-              placeholder="Enter about us content"
-              value={content.aboutUs}
-              onChange={(e) => handleContentChange("aboutUs", e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="contact-info">Contact Information</Label>
-            <Textarea
-              id="contact-info"
-              placeholder="Enter contact information"
-              value={content.contactInfo}
-              onChange={(e) => handleContentChange("contactInfo", e.target.value)}
-            />
-          </div>
-          <Button className="bg-[#003366] hover:bg-[#004080]" onClick={handleSaveChanges}>
-            Save Changes
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
-function HelpSection() {
-  const [feedback, setFeedback] = useState({
-    name: "",
-    email: "",
-    message: "",
-  })
-  const { toast } = useToast()
-
-  const handleFeedbackChange = (field: string, value: string) => {
-    setFeedback((prevFeedback) => ({
-      ...prevFeedback,
-      [field]: value,
-    }))
-  }
-
-  const handleSubmitFeedback = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Implement submit feedback logic here
-    toast({
-      title: "Feedback Submitted",
-      description: "Thank you for your feedback!",
-    })
-    setFeedback({ name: "", email: "", message: "" })
-  }
-
-  return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-[#003366]">Help & Support</h2>
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Start Guide</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ol className="list-decimal list-inside space-y-2">
-              <li>Log in to your admin dashboard</li>
-              <li>Navigate to the Listings section to manage properties</li>
-              <li>Use the Blog section to create and edit posts</li>
-              <li>Update site content in the Site Content section</li>
-              <li>For additional help, refer to the user manual or contact support</li>
-            </ol>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Feedback Form</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form className="space-y-4" onSubmit={handleSubmitFeedback}>
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  placeholder="Your name"
-                  value={feedback.name}
-                  onChange={(e) => handleFeedbackChange("name", e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Your email"
-                  value={feedback.email}
-                  onChange={(e) => handleFeedbackChange("email", e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="message">Message</Label>
-                <Textarea
-                  id="message"
-                  placeholder="Your feedback or question"
-                  value={feedback.message}
-                  onChange={(e) => handleFeedbackChange("message", e.target.value)}
-                />
-              </div>
-              <Button type="submit" className="bg-[#003366] hover:bg-[#004080]">
-                Submit Feedback
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
   )
 }
 

@@ -58,8 +58,8 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <body className={`${inter.className} flex flex-col min-h-full`}>
-        <LanguageProvider>
-          <AuthProvider>
+        <AuthProvider>
+          <LanguageProvider>
             <ScrollToTop />
             <Header />
             <PageTransition>
@@ -68,8 +68,8 @@ export default function RootLayout({
             <Footer />
             <SchemaMarkup />
             <Toaster />
-          </AuthProvider>
-        </LanguageProvider>
+          </LanguageProvider>
+        </AuthProvider>
       </body>
     </html>
   )

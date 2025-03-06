@@ -1,29 +1,31 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs"
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next()
-  const supabase = createMiddlewareClient({ req, res })
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-
-  // If trying to access admin pages without auth, redirect to login
-  if (req.nextUrl.pathname.startsWith("/admin") && !session) {
-    return NextResponse.redirect(new URL("/admin/login", req.url))
+export function middleware(request: NextRequest) {
+  // Get the pathname of the request
+  const path = request.nextUrl.pathname
+  
+  // Check if the path is protected (starts with /admin but is not /admin/login)
+  const isProtectedRoute = path.startsWith('/admin') && path !== '/admin/login'
+  
+  // Get the token from cookies
+  const token = request.cookies.get('auth-token')?.value
+  
+  // If the route is protected and there's no token, redirect to login
+  if (isProtectedRoute && !token) {
+    return NextResponse.redirect(new URL('/admin/login', request.url))
   }
-
-  // If trying to access login page with auth, redirect to admin dashboard
-  if (req.nextUrl.pathname === "/admin/login" && session) {
-    return NextResponse.redirect(new URL("/admin", req.url))
+  
+  // If the path is /admin/login and there's a token, redirect to admin dashboard
+  if (path === '/admin/login' && token) {
+    return NextResponse.redirect(new URL('/admin', request.url))
   }
-
-  return res
+  
+  return NextResponse.next()
 }
 
+// Configure the middleware to run only on specific paths
 export const config = {
-  matcher: ["/admin/:path*", "/admin/login"],
+  matcher: ['/admin/:path*']
 }
 

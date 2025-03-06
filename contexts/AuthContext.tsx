@@ -1,52 +1,94 @@
 "use client"
 
-import type React from "react"
-import { createContext, useState, useContext, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createContext, useContext, useState, useEffect, ReactNode } from "react"
+import { usePathname } from "next/navigation"
 
-interface AuthContextType {
-  user: any | null
+type User = {
+  id: string
+  email: string
+  name: string
+  role: string
+} | null
+
+type AuthContextType = {
+  user: User
   login: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
+  isLoading: boolean
+  isInitialized: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<any | null>(null)
-  const router = useRouter()
-  const supabase = createClientComponentClient()
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false)
+  const pathname = usePathname()
 
+  // Check if user is already logged in
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        setUser(session.user)
-      } else {
+    const initAuth = async () => {
+      try {
+        // For demo purposes, check localStorage
+        const storedUser = localStorage.getItem("turqaUser")
+        if (storedUser) {
+          setUser(JSON.parse(storedUser))
+        }
+      } catch (error) {
+        console.error("Authentication error:", error)
+        // Clear potentially corrupted auth data
+        localStorage.removeItem("turqaUser")
         setUser(null)
+      } finally {
+        setIsInitialized(true)
       }
-    })
+    }
 
-    return () => subscription.unsubscribe()
-  }, [supabase.auth])
+    initAuth()
+  }, [])
 
   const login = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) throw error
+    setIsLoading(true)
+    try {
+      // For demo purposes, we'll use a simple check
+      if (email === "admin@turqaestate.com" && password === "admin123") {
+        const user = {
+          id: "1",
+          email: "admin@turqaestate.com",
+          name: "Admin User",
+          role: "admin"
+        }
+        setUser(user)
+        localStorage.setItem("turqaUser", JSON.stringify(user))
+        return Promise.resolve()
+      } else {
+        return Promise.reject(new Error("Invalid credentials"))
+      }
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const logout = async () => {
-    const { error } = await supabase.auth.signOut()
-    if (error) throw error
-    router.push("/admin/login")
+    setIsLoading(true)
+    try {
+      setUser(null)
+      localStorage.removeItem("turqaUser")
+      return Promise.resolve()
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  return <AuthContext.Provider value={{ user, login, logout }}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={{ user, login, logout, isLoading, isInitialized }}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
-export const useAuth = () => {
+export function useAuth() {
   const context = useContext(AuthContext)
   if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider")
