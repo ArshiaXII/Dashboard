@@ -13,4 +13,8 @@ const connection = await mysql.createConnection({
 });
 
 // Create Drizzle instance
-export const db = drizzle(connection, { schema }); 
+export const db = drizzle(connection, { schema });
+
+export const getDb = () => {
+    // Your database connection logic
+}; 

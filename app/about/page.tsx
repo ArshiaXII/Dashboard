@@ -5,6 +5,7 @@ import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { motion } from "framer-motion"
 import { Building2, Users, Award, Target } from "lucide-react"
+import React from 'react'
 
 const teamMembers = [
   {
@@ -36,7 +37,7 @@ const achievements = [
   { icon: Target, value: "5", label: "citiesCovered" },
 ]
 
-export default function AboutPage() {
+const AboutPage = () => {
   const { t } = useLanguage()
 
   return (
@@ -110,7 +111,9 @@ export default function AboutPage() {
                     <CardTitle className="text-center text-lg sm:text-xl">{member.name}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-center text-sm sm:text-base text-gray-500">{t(member.position)}</p>
+                    <p className="text-center text-sm sm:text-base text-gray-500">
+                      {t(member.position as "ceoFounder" | "headOfSales" | "legalAdvisor" | "marketingDirector")}
+                    </p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -138,7 +141,9 @@ export default function AboutPage() {
               >
                 <achievement.icon className="w-12 h-12 mx-auto mb-2" />
                 <p className="text-3xl sm:text-4xl font-bold mb-1">{achievement.value}</p>
-                <p className="text-sm sm:text-base">{t(achievement.label)}</p>
+                <p className="text-sm sm:text-base">
+                  {t(achievement.label as "propertiesSold" | "happyClients" | "yearsOfExperience" | "citiesCovered")}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -162,10 +167,14 @@ export default function AboutPage() {
               >
                 <Card className="h-full hover:shadow-lg transition-shadow duration-300">
                   <CardHeader>
-                    <CardTitle className="text-lg sm:text-xl md:text-2xl text-center">{t(value)}</CardTitle>
+                    <CardTitle className="text-lg sm:text-xl md:text-2xl text-center">
+                      {t(value as "integrity" | "excellence" | "clientCentric")}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm sm:text-base text-center">{t(`${value}Description`)}</p>
+                    <p className="text-sm sm:text-base text-center">
+                      {t((`${value}Description`) as "integrityDescription" | "excellenceDescription" | "clientCentricDescription")}
+                    </p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -176,4 +185,6 @@ export default function AboutPage() {
     </div>
   )
 }
+
+export default AboutPage
 

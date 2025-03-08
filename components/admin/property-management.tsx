@@ -28,7 +28,7 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from "@/components/ui/dialog"
-import { toast } from "@/components/ui/use-toast"
+import { useToast } from "@/components/ui/use-toast"
 
 export function PropertyManagement() {
   const [properties, setProperties] = useState([])
@@ -39,6 +39,7 @@ export function PropertyManagement() {
   const [editingProperty, setEditingProperty] = useState(null)
   const [viewingProperty, setViewingProperty] = useState(null)
   const [refreshKey, setRefreshKey] = useState(0)
+  const { toast } = useToast()
 
   useEffect(() => {
     const fetchProperties = async () => {
