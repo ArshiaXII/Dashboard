@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator"
 import { PropertyGallery } from "@/components/property-gallery"
 import { PropertyLocation } from "@/components/property-location"
 import { PropertyAdvantages } from "@/components/property-advantages"
+import { useParams } from "next/navigation"
 
 // Mock data - in a real app this would come from an API
 const propertyData = {
@@ -78,6 +79,18 @@ Impeccable location in the popular Oba area close to the sea and the center of A
 
 export default function PropertyDetailPage() {
   const [isFavorite, setIsFavorite] = useState(false)
+  const params = useParams()
+  const id = params.id
+
+  // In a real app, you would fetch the property data based on the ID
+  // useEffect(() => {
+  //   const fetchProperty = async () => {
+  //     const response = await fetch(`/api/properties/${id}`);
+  //     const data = await response.json();
+  //     setProperty(data);
+  //   };
+  //   fetchProperty();
+  // }, [id]);
 
   return (
     <div className="min-h-screen bg-[#F8F9FB] pt-16">
@@ -190,5 +203,16 @@ export default function PropertyDetailPage() {
       </div>
     </div>
   )
+}
+
+export const dynamicParams = false // This tells Next.js not to attempt generating pages for IDs not returned by generateStaticParams
+
+export async function generateStaticParams() {
+  // Return a few example IDs
+  return [
+    { id: '1' },
+    { id: '2' },
+    { id: '3' }
+  ]
 }
 
