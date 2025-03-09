@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useParams } from "next/navigation"
 import Link from "next/link"
 import { MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -10,10 +11,9 @@ import { Separator } from "@/components/ui/separator"
 import { PropertyGallery } from "@/components/property-gallery"
 import { PropertyLocation } from "@/components/property-location"
 import { PropertyAdvantages } from "@/components/property-advantages"
-import { useParams } from "next/navigation"
 
 // Mock data - in a real app this would come from an API
-const propertyData = {
+const mockPropertyData = {
   id: 1,
   title: "OBA VALENTINO VIP",
   location: "Alanya, Antalya, Turkey NO.134256",
@@ -78,19 +78,57 @@ Impeccable location in the popular Oba area close to the sea and the center of A
 }
 
 export default function PropertyDetailPage() {
-  const [isFavorite, setIsFavorite] = useState(false)
   const params = useParams()
-  const id = params.id
+  const [propertyData, setPropertyData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [isFavorite, setIsFavorite] = useState(false)
 
-  // In a real app, you would fetch the property data based on the ID
-  // useEffect(() => {
-  //   const fetchProperty = async () => {
-  //     const response = await fetch(`/api/properties/${id}`);
-  //     const data = await response.json();
-  //     setProperty(data);
-  //   };
-  //   fetchProperty();
-  // }, [id]);
+  useEffect(() => {
+    // In a real app, you would fetch the property data from an API
+    // For now, we'll just use the mock data
+    try {
+      // Simulate API call
+      setTimeout(() => {
+        setPropertyData(mockPropertyData)
+        setLoading(false)
+      }, 500)
+    } catch (err) {
+      console.error("Error fetching property data:", err)
+      setError("Failed to load property data. Please try again later.")
+      setLoading(false)
+    }
+  }, [params.id])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F8F9FB] pt-16 flex items-center justify-center">
+        <p>Loading property details...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#F8F9FB] pt-16 flex flex-col items-center justify-center">
+        <p className="text-red-500 mb-4">{error}</p>
+        <Link href="/" className="text-blue-500 hover:underline">
+          Return to home page
+        </Link>
+      </div>
+    )
+  }
+
+  if (!propertyData) {
+    return (
+      <div className="min-h-screen bg-[#F8F9FB] pt-16 flex flex-col items-center justify-center">
+        <p className="text-red-500 mb-4">Property not found</p>
+        <Link href="/" className="text-blue-500 hover:underline">
+          Return to home page
+        </Link>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-[#F8F9FB] pt-16">
@@ -203,16 +241,5 @@ export default function PropertyDetailPage() {
       </div>
     </div>
   )
-}
-
-export const dynamicParams = false // This tells Next.js not to attempt generating pages for IDs not returned by generateStaticParams
-
-export async function generateStaticParams() {
-  // Return a few example IDs
-  return [
-    { id: '1' },
-    { id: '2' },
-    { id: '3' }
-  ]
 }
 
