@@ -57,14 +57,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full">
+      <head>
+        <title>TurqaEstate - Turkish Real Estate</title>
+        <meta name="description" content="Find your dream property in Turkey with TurqaEstate" />
+      </head>
       <body className={`${inter.className} flex flex-col min-h-full`}>
         <AuthProvider>
           <LanguageProvider>
             <ScrollToTop />
             <Header />
-            <PageTransition>
-              <main className="flex-grow">{children}</main>
-            </PageTransition>
+            <main className="pt-24">
+              {children}
+            </main>
             <Footer />
             <SchemaMarkup />
             <Toaster />

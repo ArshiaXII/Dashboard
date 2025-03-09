@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
-import { MapPin } from "lucide-react"
+import { MapPin, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator"
 import { PropertyGallery } from "@/components/property-gallery"
 import { PropertyLocation } from "@/components/property-location"
 import { PropertyAdvantages } from "@/components/property-advantages"
+import { motion } from "framer-motion"
 
 // Mock data - in a real app this would come from an API
 const mockPropertyData = {
@@ -77,6 +78,27 @@ Impeccable location in the popular Oba area close to the sea and the center of A
   ],
 }
 
+// Animation variants
+const fadeIn = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.6 } }
+}
+
+const slideUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+}
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+}
+
 export default function PropertyDetailPage() {
   const params = useParams()
   const [propertyData, setPropertyData] = useState(null)
@@ -103,111 +125,166 @@ export default function PropertyDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F8F9FB] pt-16 flex items-center justify-center">
-        <p>Loading property details...</p>
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="h-8 w-48 bg-gray-200 rounded mb-4"></div>
+          <div className="h-4 w-64 bg-gray-200 rounded mb-8"></div>
+          <div className="h-64 w-full max-w-2xl bg-gray-200 rounded"></div>
+        </div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#F8F9FB] pt-16 flex flex-col items-center justify-center">
-        <p className="text-red-500 mb-4">{error}</p>
-        <Link href="/" className="text-blue-500 hover:underline">
-          Return to home page
-        </Link>
+      <div className="min-h-screen bg-[#F8F9FB] pt-16 flex flex-col items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-center"
+        >
+          <p className="text-red-500 mb-4 text-lg">{error}</p>
+          <Link href="/" className="text-blue-500 hover:underline">
+            Return to home page
+          </Link>
+        </motion.div>
       </div>
     )
   }
 
   if (!propertyData) {
     return (
-      <div className="min-h-screen bg-[#F8F9FB] pt-16 flex flex-col items-center justify-center">
-        <p className="text-red-500 mb-4">Property not found</p>
-        <Link href="/" className="text-blue-500 hover:underline">
-          Return to home page
-        </Link>
+      <div className="min-h-screen bg-[#F8F9FB] pt-16 flex flex-col items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-center"
+        >
+          <p className="text-red-500 mb-4 text-lg">Property not found</p>
+          <Link href="/" className="text-blue-500 hover:underline">
+            Return to home page
+          </Link>
+        </motion.div>
       </div>
     )
   }
 
   return (
     <div className="min-h-screen bg-[#F8F9FB] pt-16">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
         {/* Breadcrumb */}
-        <div className="flex items-center space-x-2 text-sm text-gray-500 mb-6">
+        <motion.div 
+          initial="hidden"
+          animate="visible"
+          variants={fadeIn}
+          className="flex flex-wrap items-center text-sm text-gray-500 mb-4 sm:mb-6"
+        >
           <Link href="/" className="hover:text-gray-900">
             Memoshome
           </Link>
-          <span>/</span>
+          <span className="mx-2">/</span>
           <Link href="/projects" className="hover:text-gray-900">
             Projects
           </Link>
-          <span>/</span>
-          <span className="text-gray-900">{propertyData.title}</span>
-        </div>
+          <span className="mx-2">/</span>
+          <span className="text-gray-900 truncate max-w-[200px] sm:max-w-none">{propertyData.title}</span>
+        </motion.div>
 
         {/* Title Section */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold mb-2">{propertyData.title}</h1>
-          <p className="text-gray-500 flex items-center">
-            <MapPin className="h-4 w-4 mr-1" />
-            {propertyData.location}
+        <motion.div 
+          initial="hidden"
+          animate="visible"
+          variants={slideUp}
+          className="mb-6"
+        >
+          <div className="flex justify-between items-start">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2">{propertyData.title}</h1>
+            <button 
+              onClick={() => setIsFavorite(!isFavorite)}
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+              aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            >
+              <Heart 
+                className={`h-6 w-6 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 
+                strokeWidth={isFavorite ? 2 : 1.5}
+              />
+            </button>
+          </div>
+          <p className="text-gray-500 flex items-center flex-wrap">
+            <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
+            <span className="break-words">{propertyData.location}</span>
           </p>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+          <motion.div 
+            initial="hidden"
+            animate="visible"
+            variants={staggerContainer}
+            className="lg:col-span-2 space-y-6 sm:space-y-8"
+          >
             {/* Image Gallery */}
-            <PropertyGallery images={propertyData.images} />
+            <motion.div variants={slideUp}>
+              <PropertyGallery images={propertyData.images} />
+            </motion.div>
 
             {/* Description */}
-            <div className="space-y-8">
-              <div>
-                <h2 className="text-xl font-bold mb-4">PROJECT DESCRIPTION</h2>
-                <p className="text-gray-600 whitespace-pre-line leading-relaxed">{propertyData.description}</p>
-              </div>
+            <motion.div 
+              variants={staggerContainer}
+              className="space-y-6 sm:space-y-8"
+            >
+              <motion.div variants={slideUp}>
+                <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">PROJECT DESCRIPTION</h2>
+                <p className="text-gray-600 whitespace-pre-line leading-relaxed text-sm sm:text-base">{propertyData.description}</p>
+              </motion.div>
 
               {/* Location */}
-              <div>
-                <h2 className="text-xl font-bold mb-4">LOCATION</h2>
+              <motion.div variants={slideUp}>
+                <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">LOCATION</h2>
                 <PropertyLocation distances={propertyData.distances} />
-              </div>
+              </motion.div>
 
               {/* Advantages */}
-              <div>
-                <h2 className="text-xl font-bold mb-4">ADVANTAGES</h2>
+              <motion.div variants={slideUp}>
+                <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">ADVANTAGES</h2>
                 <PropertyAdvantages advantages={propertyData.advantages} />
-              </div>
-            </div>
-          </div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-1">
+          <motion.div 
+            initial="hidden"
+            animate="visible"
+            variants={fadeIn}
+            className="lg:col-span-1"
+          >
             <div className="sticky top-24 space-y-6">
-              <Card className="overflow-hidden">
-                <CardContent className="p-6 space-y-6">
+              <Card className="overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
+                <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                   {/* Key Details */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <p className="text-gray-500 text-sm">Area</p>
-                      <p className="font-semibold">from {propertyData.area} m²</p>
+                      <p className="text-gray-500 text-xs sm:text-sm">Area</p>
+                      <p className="font-semibold text-sm sm:text-base">from {propertyData.area} m²</p>
                     </div>
                     <div>
-                      <p className="text-gray-500 text-sm">District</p>
-                      <p className="font-semibold">Oba</p>
+                      <p className="text-gray-500 text-xs sm:text-sm">District</p>
+                      <p className="font-semibold text-sm sm:text-base">Oba</p>
                     </div>
                     <div>
-                      <p className="text-gray-500 text-sm">Floors</p>
-                      <p className="font-semibold">{propertyData.floors}</p>
+                      <p className="text-gray-500 text-xs sm:text-sm">Floors</p>
+                      <p className="font-semibold text-sm sm:text-base">{propertyData.floors}</p>
                     </div>
                     <div>
-                      <p className="text-gray-500 text-sm">Year of delivery</p>
-                      <p className="font-semibold">{propertyData.yearOfDelivery}</p>
+                      <p className="text-gray-500 text-xs sm:text-sm">Year of delivery</p>
+                      <p className="font-semibold text-sm sm:text-base">{propertyData.yearOfDelivery}</p>
                     </div>
                     <div className="col-span-2">
-                      <p className="text-gray-500 text-sm">To the sea</p>
-                      <p className="font-semibold">{propertyData.distanceToSea} m</p>
+                      <p className="text-gray-500 text-xs sm:text-sm">To the sea</p>
+                      <p className="font-semibold text-sm sm:text-base">{propertyData.distanceToSea} m</p>
                     </div>
                   </div>
 
@@ -215,28 +292,35 @@ export default function PropertyDetailPage() {
 
                   {/* Price */}
                   <div>
-                    <p className="text-gray-500 text-sm mb-2">Price</p>
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge variant="outline">100% payment</Badge>
-                      <Badge variant="outline">Installment</Badge>
+                    <p className="text-gray-500 text-xs sm:text-sm mb-2">Price</p>
+                    <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                      <Badge variant="outline" className="text-xs">100% payment</Badge>
+                      <Badge variant="outline" className="text-xs">Installment</Badge>
                     </div>
-                    <p className="text-2xl font-bold">
+                    <p className="text-xl sm:text-2xl font-bold">
                       {propertyData.price.toLocaleString()} {propertyData.currency}
                     </p>
                   </div>
 
-                  <div className="space-y-2">
-                    <Button className="w-full" size="lg">
+                  <div className="space-y-2 sm:space-y-3">
+                    <Button 
+                      className="w-full bg-primary hover:bg-primary/90 transition-colors duration-300" 
+                      size="lg"
+                    >
                       Book a viewing
                     </Button>
-                    <Button variant="outline" className="w-full" size="lg">
+                    <Button 
+                      variant="outline" 
+                      className="w-full border-primary text-primary hover:bg-primary/5 transition-colors duration-300" 
+                      size="lg"
+                    >
                       Ask a question
                     </Button>
                   </div>
                 </CardContent>
               </Card>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
