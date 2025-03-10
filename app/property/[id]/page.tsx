@@ -3,15 +3,12 @@
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
-import { MapPin, Heart } from "lucide-react"
+import Image from "next/image"
+import { MapPin, Heart, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { PropertyGallery } from "@/components/property-gallery"
-import { PropertyLocation } from "@/components/property-location"
-import { PropertyAdvantages } from "@/components/property-advantages"
-import { motion } from "framer-motion"
 
 // Mock data - in a real app this would come from an API
 const mockPropertyData = {
@@ -78,25 +75,105 @@ Impeccable location in the popular Oba area close to the sea and the center of A
   ],
 }
 
-// Animation variants
-const fadeIn = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.6 } }
-}
+// Simple gallery component
+function PropertyGallery({ images }) {
+  const [currentIndex, setCurrentIndex] = useState(0)
 
-const slideUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
-}
-
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
+  const goToPrevious = () => {
+    const isFirstSlide = currentIndex === 0
+    const newIndex = isFirstSlide ? images.length - 1 : currentIndex - 1
+    setCurrentIndex(newIndex)
   }
+
+  const goToNext = () => {
+    const isLastSlide = currentIndex === images.length - 1
+    const newIndex = isLastSlide ? 0 : currentIndex + 1
+    setCurrentIndex(newIndex)
+  }
+
+  return (
+    <div className="relative rounded-lg overflow-hidden bg-gray-100">
+      <div className="aspect-[16/9] relative">
+        <Image
+          src={images[currentIndex]}
+          alt={`Property image ${currentIndex + 1}`}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          priority={currentIndex === 0}
+        />
+      </div>
+
+      {/* Navigation arrows */}
+      <button
+        onClick={goToPrevious}
+        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-md transition-colors duration-200"
+        aria-label="Previous image"
+      >
+        <ChevronLeft className="h-5 w-5" />
+      </button>
+      <button
+        onClick={goToNext}
+        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-md transition-colors duration-200"
+        aria-label="Next image"
+      >
+        <ChevronRight className="h-5 w-5" />
+      </button>
+
+      {/* Image counter */}
+      <div className="absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm">
+        {currentIndex + 1} / {images.length}
+      </div>
+    </div>
+  )
+}
+
+// Simple location component
+function PropertyLocation({ distances }) {
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {distances.map((item, index) => (
+          <div
+            key={index}
+            className="flex items-start p-3 bg-white rounded-lg shadow-sm"
+          >
+            <div className="flex-1">
+              <p className="text-sm text-gray-500 mb-1">Distance {item.label}</p>
+              <p className="font-medium">{item.distance}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// Simple advantages component
+function PropertyAdvantages({ advantages }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      {advantages.map((advantage, index) => (
+        <div
+          key={index}
+          className="bg-white rounded-lg overflow-hidden shadow-sm"
+        >
+          <div className="relative h-40 w-full">
+            <Image
+              src={advantage.image}
+              alt={advantage.title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+            />
+          </div>
+          <div className="p-3 text-center">
+            <h3 className="font-medium text-sm sm:text-base">{advantage.title}</h3>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
 }
 
 export default function PropertyDetailPage() {
@@ -137,17 +214,12 @@ export default function PropertyDetailPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-[#F8F9FB] pt-16 flex flex-col items-center justify-center px-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="text-center"
-        >
+        <div className="text-center">
           <p className="text-red-500 mb-4 text-lg">{error}</p>
           <Link href="/" className="text-blue-500 hover:underline">
             Return to home page
           </Link>
-        </motion.div>
+        </div>
       </div>
     )
   }
@@ -155,17 +227,12 @@ export default function PropertyDetailPage() {
   if (!propertyData) {
     return (
       <div className="min-h-screen bg-[#F8F9FB] pt-16 flex flex-col items-center justify-center px-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="text-center"
-        >
+        <div className="text-center">
           <p className="text-red-500 mb-4 text-lg">Property not found</p>
           <Link href="/" className="text-blue-500 hover:underline">
             Return to home page
           </Link>
-        </motion.div>
+        </div>
       </div>
     )
   }
@@ -174,30 +241,20 @@ export default function PropertyDetailPage() {
     <div className="min-h-screen bg-[#F8F9FB] pt-16">
       <div className="container mx-auto px-4 py-6 sm:py-8">
         {/* Breadcrumb */}
-        <motion.div 
-          initial="hidden"
-          animate="visible"
-          variants={fadeIn}
-          className="flex flex-wrap items-center text-sm text-gray-500 mb-4 sm:mb-6"
-        >
+        <div className="flex flex-wrap items-center text-sm text-gray-500 mb-4 sm:mb-6">
           <Link href="/" className="hover:text-gray-900">
             Memoshome
           </Link>
           <span className="mx-2">/</span>
-          <Link href="/projects" className="hover:text-gray-900">
-            Projects
+          <Link href="/catalog" className="hover:text-gray-900">
+            Catalog
           </Link>
           <span className="mx-2">/</span>
           <span className="text-gray-900 truncate max-w-[200px] sm:max-w-none">{propertyData.title}</span>
-        </motion.div>
+        </div>
 
         {/* Title Section */}
-        <motion.div 
-          initial="hidden"
-          animate="visible"
-          variants={slideUp}
-          className="mb-6"
-        >
+        <div className="mb-6">
           <div className="flex justify-between items-start">
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2">{propertyData.title}</h1>
             <button 
@@ -215,54 +272,39 @@ export default function PropertyDetailPage() {
             <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
             <span className="break-words">{propertyData.location}</span>
           </p>
-        </motion.div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Main Content */}
-          <motion.div 
-            initial="hidden"
-            animate="visible"
-            variants={staggerContainer}
-            className="lg:col-span-2 space-y-6 sm:space-y-8"
-          >
+          <div className="lg:col-span-2 space-y-6 sm:space-y-8">
             {/* Image Gallery */}
-            <motion.div variants={slideUp}>
-              <PropertyGallery images={propertyData.images} />
-            </motion.div>
+            <PropertyGallery images={propertyData.images} />
 
             {/* Description */}
-            <motion.div 
-              variants={staggerContainer}
-              className="space-y-6 sm:space-y-8"
-            >
-              <motion.div variants={slideUp}>
+            <div className="space-y-6 sm:space-y-8">
+              <div>
                 <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">PROJECT DESCRIPTION</h2>
                 <p className="text-gray-600 whitespace-pre-line leading-relaxed text-sm sm:text-base">{propertyData.description}</p>
-              </motion.div>
+              </div>
 
               {/* Location */}
-              <motion.div variants={slideUp}>
+              <div>
                 <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">LOCATION</h2>
                 <PropertyLocation distances={propertyData.distances} />
-              </motion.div>
+              </div>
 
               {/* Advantages */}
-              <motion.div variants={slideUp}>
+              <div>
                 <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">ADVANTAGES</h2>
                 <PropertyAdvantages advantages={propertyData.advantages} />
-              </motion.div>
-            </motion.div>
-          </motion.div>
+              </div>
+            </div>
+          </div>
 
           {/* Sidebar */}
-          <motion.div 
-            initial="hidden"
-            animate="visible"
-            variants={fadeIn}
-            className="lg:col-span-1"
-          >
+          <div className="lg:col-span-1">
             <div className="sticky top-24 space-y-6">
-              <Card className="overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
+              <Card className="overflow-hidden shadow-md">
                 <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                   {/* Key Details */}
                   <div className="grid grid-cols-2 gap-3 sm:gap-4">
@@ -304,14 +346,14 @@ export default function PropertyDetailPage() {
 
                   <div className="space-y-2 sm:space-y-3">
                     <Button 
-                      className="w-full bg-primary hover:bg-primary/90 transition-colors duration-300" 
+                      className="w-full" 
                       size="lg"
                     >
                       Book a viewing
                     </Button>
                     <Button 
                       variant="outline" 
-                      className="w-full border-primary text-primary hover:bg-primary/5 transition-colors duration-300" 
+                      className="w-full" 
                       size="lg"
                     >
                       Ask a question
@@ -320,7 +362,7 @@ export default function PropertyDetailPage() {
                 </CardContent>
               </Card>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>

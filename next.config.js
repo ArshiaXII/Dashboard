@@ -4,6 +4,7 @@ const nextConfig = {
     domains: ['hebbkx1anhila5yf.public.blob.vercel-storage.com'],
     unoptimized: true,
   },
+  reactStrictMode: true,
 }
 
 module.exports = nextConfig 

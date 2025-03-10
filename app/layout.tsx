@@ -1,47 +1,15 @@
-import type { Metadata } from "next"
+import './globals.css'
 import { Inter } from "next/font/google"
-import "./globals.css"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { LanguageProvider } from "@/contexts/LanguageContext"
-import { AuthProvider } from "@/contexts/AuthContext"
-import { PageTransition } from "@/components/page-transition"
-import { SchemaMarkup } from "@/components/schema-markup"
-import { ScrollToTop } from "@/components/scroll-to-top"
-import { Toaster } from "@/components/ui/toaster"
-import type React from "react"
+import { Suspense } from 'react'
+
+// Import the client layout directly for type checking
+import ClientLayoutComponent from "@/components/client-layout"
 
 const inter = Inter({ subsets: ["latin"] })
 
-export const metadata: Metadata = {
-  title: {
-    default: "TurqaEstate - Premium Real Estate in Turkey",
-    template: "%s | TurqaEstate",
-  },
-  description:
-    "Discover luxury properties in Turkey with TurqaEstate. Expert guidance for buying, selling, and investing in Turkish real estate.",
-  keywords: [
-    "Turkey real estate",
-    "luxury properties",
-    "Antalya homes",
-    "Alanya villas",
-    "Turkish property investment",
-  ],
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: "https://www.turqaestate.com",
-    siteName: "TurqaEstate",
-    images: [
-      {
-        url: "https://www.turqaestate.com/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "TurqaEstate - Premium Real Estate in Turkey",
-      },
-    ],
-  },
-    generator: 'v0.dev'
+export const metadata = {
+  title: "TurqaEstate - Turkish Real Estate",
+  description: "Find your dream property in Turkey with TurqaEstate, the leading real estate company in the Turkish Riviera.",
 }
 
 export const viewport = {
@@ -50,6 +18,13 @@ export const viewport = {
   maximumScale: 1,
 }
 
+// Create a dynamic import wrapper for the client component
+import dynamic from 'next/dynamic'
+const ClientLayout = dynamic(() => import('@/components/client-layout'), { 
+  ssr: false,
+  loading: () => <div className="min-h-screen flex items-center justify-center">Loading...</div>
+})
+
 export default function RootLayout({
   children,
 }: {
@@ -57,28 +32,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full">
-      <head>
-        <title>TurqaEstate - Turkish Real Estate</title>
-        <meta name="description" content="Find your dream property in Turkey with TurqaEstate" />
-      </head>
       <body className={`${inter.className} flex flex-col min-h-full`}>
-        <AuthProvider>
-          <LanguageProvider>
-            <ScrollToTop />
-            <Header />
-            <main className="pt-24">
-              {children}
-            </main>
-            <Footer />
-            <SchemaMarkup />
-            <Toaster />
-          </LanguageProvider>
-        </AuthProvider>
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+          <ClientLayout>{children}</ClientLayout>
+        </Suspense>
       </body>
     </html>
   )
 }
-
-
-
-import './globals.css'
