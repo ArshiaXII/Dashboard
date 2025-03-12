@@ -14,27 +14,24 @@ interface PropertyAdvantagesProps {
 
 export function PropertyAdvantages({ advantages }: PropertyAdvantagesProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
       {advantages.map((advantage, index) => (
         <motion.div
           key={index}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: index * 0.1 }}
-          className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 group"
+          transition={{ delay: index * 0.1 }}
+          className="group cursor-pointer"
         >
-          <div className="relative h-40 w-full">
+          <div className="relative aspect-square rounded-lg overflow-hidden mb-2">
             <Image
-              src={advantage.image}
+              src={advantage.image || "/placeholder.svg"}
               alt={advantage.title}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
           </div>
-          <div className="p-3 text-center">
-            <h3 className="font-medium text-sm sm:text-base">{advantage.title}</h3>
-          </div>
+          <p className="text-sm text-center text-gray-600">{advantage.title}</p>
         </motion.div>
       ))}
     </div>

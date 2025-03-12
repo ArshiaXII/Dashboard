@@ -7,17 +7,17 @@ import { useAuth } from "@/contexts/AuthContext"
 
 export default function AdminLoginPage() {
   const router = useRouter()
-  const { user, isLoading } = useAuth()
+  const { user, isInitialized } = useAuth()
   
   // Redirect to admin dashboard if already logged in
   useEffect(() => {
-    if (user && !isLoading) {
+    if (user && isInitialized) {
       router.push("/admin")
     }
-  }, [user, isLoading, router])
+  }, [user, isInitialized, router])
 
   // Don't render anything while checking authentication
-  if (isLoading) {
+  if (!isInitialized) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>
   }
 

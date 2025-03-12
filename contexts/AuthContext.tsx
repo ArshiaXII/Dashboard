@@ -1,7 +1,6 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react"
-import { usePathname } from "next/navigation"
 
 type User = {
   id: string
@@ -24,7 +23,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
-  const pathname = usePathname()
 
   // Check if user is already logged in
   useEffect(() => {

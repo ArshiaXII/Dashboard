@@ -43,7 +43,7 @@ export default function LoginPage() {
             transition={{ duration: 0.5 }}
           >
             <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-YrmtHArqFMEzPzgCTB1qGyCGUs18aV.png"
+              src="/logo.png"
               alt="Turqa Estate Logo"
               width={200}
               height={60}

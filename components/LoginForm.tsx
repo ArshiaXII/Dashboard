@@ -6,7 +6,6 @@ import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useToast } from "@/components/ui/use-toast"
 import { useAuth } from "@/contexts/AuthContext"
 import Link from "next/link"
 
@@ -17,7 +16,6 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
-  const { toast } = useToast()
   const { login } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,20 +29,12 @@ export function LoginForm() {
       // Set a cookie for the middleware to use
       document.cookie = "auth-token=authenticated; path=/; max-age=86400"; // 24 hours
       
-      toast({
-        title: "Login successful",
-        description: "Welcome back to Turqa Estate admin panel.",
-      })
-      
-      // Navigate to admin dashboard
-      router.push("/admin")
+      // Add a small delay before redirecting to ensure state is updated
+      setTimeout(() => {
+        router.push("/admin")
+      }, 500)
     } catch (error) {
       setError("Invalid email or password. Please try again.")
-      toast({
-        title: "Login failed",
-        description: "Invalid email or password. Please try again.",
-        variant: "destructive",
-      })
     } finally {
       setIsLoading(false)
     }

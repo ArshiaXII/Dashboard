@@ -13,7 +13,7 @@ export function middleware(request: NextRequest) {
   
   // If the route is protected and there's no token, redirect to login
   if (isProtectedRoute && !token) {
-    return NextResponse.redirect(new URL('/admin/login', request.url))
+    return NextResponse.redirect(new URL('/login', request.url))
   }
   
   // If the path is /admin/login and there's a token, redirect to admin dashboard

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import Head from "next/head"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/contexts/AuthContext"
 import { PropertyManagement } from "@/components/admin/property-management"
@@ -151,11 +151,16 @@ function DashboardOverview() {
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard")
   const { logout } = useAuth()
+  const router = useRouter()
 
   const handleLogout = async () => {
-    await logout()
-    document.cookie = "auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
-    window.location.href = "/admin/login"
+    try {
+      await logout()
+      document.cookie = "auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
+      router.push("/admin/login")
+    } catch (error) {
+      console.error("Logout error:", error)
+    }
   }
 
   const renderTabContent = () => {
@@ -170,130 +175,119 @@ export default function AdminDashboard() {
   }
 
   return (
-    <>
-      <Head>
-        <title>Turqa Estate - Admin Dashboard</title>
-        <meta
-          name="description"
-          content="Manage luxury real estate listings, blog posts, and site content for Turqa Estate."
-        />
-        <meta name="keywords" content="real estate, luxury properties, admin panel, turqa estate, dashboard" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      </Head>
-      <div className="min-h-screen bg-gray-100">
-        <header className="bg-white shadow-md">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-[#003366]">Admin Dashboard</h1>
-            <Button variant="outline" onClick={handleLogout}>
-              Logout
-            </Button>
+    <div className="min-h-screen bg-gray-100">
+      <header className="bg-white shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-[#003366]">Admin Dashboard</h1>
+          <Button variant="outline" onClick={handleLogout}>
+            Logout
+          </Button>
+        </div>
+      </header>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Sidebar Navigation */}
+          <div className="w-full md:w-64 bg-white rounded-lg shadow-sm">
+            <nav className="p-4">
+              <ul className="space-y-2">
+                <li>
+                  <button
+                    onClick={() => setActiveTab("dashboard")}
+                    className={`w-full flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
+                      activeTab === "dashboard"
+                        ? "bg-[#003366] text-white"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    <LayoutDashboard className="mr-3 h-5 w-5" />
+                    Dashboard
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setActiveTab("properties")}
+                    className={`w-full flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
+                      activeTab === "properties"
+                        ? "bg-[#003366] text-white"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    <Building className="mr-3 h-5 w-5" />
+                    Properties
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setActiveTab("blog")}
+                    className={`w-full flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
+                      activeTab === "blog"
+                        ? "bg-[#003366] text-white"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    <FileText className="mr-3 h-5 w-5" />
+                    Blog Posts
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setActiveTab("inquiries")}
+                    className={`w-full flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
+                      activeTab === "inquiries"
+                        ? "bg-[#003366] text-white"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    <MessageSquare className="mr-3 h-5 w-5" />
+                    Inquiries
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setActiveTab("users")}
+                    className={`w-full flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
+                      activeTab === "users"
+                        ? "bg-[#003366] text-white"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    <Users className="mr-3 h-5 w-5" />
+                    Users
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setActiveTab("settings")}
+                    className={`w-full flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
+                      activeTab === "settings"
+                        ? "bg-[#003366] text-white"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    <Settings className="mr-3 h-5 w-5" />
+                    Settings
+                  </button>
+                </li>
+              </ul>
+            </nav>
           </div>
-        </header>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Sidebar Navigation */}
-            <div className="w-full md:w-64 bg-white rounded-lg shadow-sm">
-              <nav className="p-4">
-                <ul className="space-y-2">
-                  <li>
-                    <button
-                      onClick={() => setActiveTab("dashboard")}
-                      className={`w-full flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
-                        activeTab === "dashboard"
-                          ? "bg-[#003366] text-white"
-                          : "text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      <LayoutDashboard className="mr-3 h-5 w-5" />
-                      Dashboard
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => setActiveTab("properties")}
-                      className={`w-full flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
-                        activeTab === "properties"
-                          ? "bg-[#003366] text-white"
-                          : "text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      <Building className="mr-3 h-5 w-5" />
-                      Properties
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => setActiveTab("blog")}
-                      className={`w-full flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
-                        activeTab === "blog"
-                          ? "bg-[#003366] text-white"
-                          : "text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      <FileText className="mr-3 h-5 w-5" />
-                      Blog Posts
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => setActiveTab("inquiries")}
-                      className={`w-full flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
-                        activeTab === "inquiries"
-                          ? "bg-[#003366] text-white"
-                          : "text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      <MessageSquare className="mr-3 h-5 w-5" />
-                      Inquiries
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => setActiveTab("users")}
-                      className={`w-full flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
-                        activeTab === "users"
-                          ? "bg-[#003366] text-white"
-                          : "text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      <Users className="mr-3 h-5 w-5" />
-                      Users
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => setActiveTab("settings")}
-                      className={`w-full flex items-center px-4 py-2 text-sm rounded-md transition-colors ${
-                        activeTab === "settings"
-                          ? "bg-[#003366] text-white"
-                          : "text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      <Settings className="mr-3 h-5 w-5" />
-                      Settings
-                    </button>
-                  </li>
-                </ul>
-              </nav>
-            </div>
-
-            {/* Main Content */}
-            <div className="flex-1 bg-white rounded-lg shadow-sm p-6">
-              {renderTabContent()}
-            </div>
+          {/* Main Content */}
+          <div className="flex-1 bg-white rounded-lg shadow-sm p-6">
+            {renderTabContent()}
           </div>
         </div>
-
-        <footer className="bg-white mt-8 py-6 border-t">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <p className="text-center text-sm text-gray-500">
-              &copy; {new Date().getFullYear()} Turqa Estate. All rights reserved.
-            </p>
-          </div>
-        </footer>
       </div>
-    </>
+
+      <footer className="bg-white mt-8 py-6 border-t">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-sm text-gray-500">
+            &copy; {new Date().getFullYear()} Turqa Estate. All rights reserved.
+          </p>
+        </div>
+      </footer>
+    </div>
   )
 }
 

@@ -10,7 +10,7 @@ const blogPosts = [
   {
     id: 1,
     title: "Türk Rivierası'nın Gizli Cevherlerini Keşfedin!",
-    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-KT1y5T9J1vbWZEQgE8O68AiAunU7MH.png",
+    image: "/placeholder.svg?height=300&width=400",
     date: "21.01.2025",
     slug: "turk-rivierasinin-gizli-cevherlerini-kesfedin",
   },
@@ -40,121 +40,80 @@ export function Footer() {
   const { t } = useLanguage()
 
   return (
-    <footer className="bg-white">
-      {/* News Section */}
-      <div className="container mx-auto px-4 py-12">
-        <h2 className="text-xl font-semibold text-gray-800 mb-8">{t("latestNews")}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {blogPosts.map((post) => (
-            <BlogCard key={post.id} post={post} />
-          ))}
-        </div>
-        <div className="text-right mt-8">
-          <Link href="/blog" className="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center">
-            {t("viewAllNews")} →
-          </Link>
+    <footer className="bg-gray-900 text-white">
+      {/* Top section */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div>
+            <h3 className="font-semibold mb-4">Buy Apartments in Turkey</h3>
+            <p className="text-sm text-gray-400">
+              Find your dream property in Turkey with our expert guidance and comprehensive listings.
+            </p>
+          </div>
+          <div>
+            <h3 className="font-semibold mb-4">Top Property Locations</h3>
+            <ul className="text-sm text-gray-400 space-y-2">
+              <li><Link href="#">Antalya</Link></li>
+              <li><Link href="#">Istanbul</Link></li>
+              <li><Link href="#">Alanya</Link></li>
+              <li><Link href="#">Bodrum</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-semibold mb-4">Our Services</h3>
+            <ul className="text-sm text-gray-400 space-y-2">
+              <li><Link href="#">Property Management</Link></li>
+              <li><Link href="#">Legal Assistance</Link></li>
+              <li><Link href="#">Citizenship by Investment</Link></li>
+              <li><Link href="#">After-Sales Support</Link></li>
+            </ul>
+          </div>
         </div>
       </div>
 
-      {/* Main Footer */}
-      <div className="border-t">
-        <div className="container mx-auto px-4 py-8">
-          {/* Frequently Visited Pages */}
-          <div className="mb-8">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">{t("frequentlyVisitedPages")}</h3>
-            <div className="flex flex-wrap gap-4">
-              {frequentPages.map((page) => (
-                <Link
-                  key={page.href}
-                  href={page.href}
-                  className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
-                >
-                  {page.title}
-                </Link>
-              ))}
+      {/* Middle section */}
+      <div className="border-t border-gray-800">
+        <div className="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
+          <div className="text-sm text-gray-400 mb-4 md:mb-0">
+            © {new Date().getFullYear()} TurqaEstate. All Rights Reserved.
+          </div>
+          <div className="flex space-x-4">
+            <Link href="#" className="text-sm text-gray-400 hover:text-white">Legal Notice</Link>
+            <Link href="#" className="text-sm text-gray-400 hover:text-white">Terms of Use</Link>
+            <Link href="#" className="text-sm text-gray-400 hover:text-white">Privacy Policy</Link>
+            <Link href="#" className="text-sm text-gray-400 hover:text-white">Cookies Policy</Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom section */}
+      <div className="border-t border-gray-800">
+        <div className="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
+          <div className="flex items-center mb-4 md:mb-0">
+            <span className="text-sm text-gray-400 mr-4">CALL US: +90 242 234 54 94</span>
+            <span className="text-sm text-gray-400">FOLLOW US:</span>
+            <div className="flex space-x-2 ml-2">
+              <Link href="#" aria-label="Facebook">
+                <Facebook className="h-4 w-4 text-gray-400 hover:text-white" />
+              </Link>
+              <Link href="#" aria-label="Twitter">
+                <Twitter className="h-4 w-4 text-gray-400 hover:text-white" />
+              </Link>
+              <Link href="#" aria-label="Instagram">
+                <Instagram className="h-4 w-4 text-gray-400 hover:text-white" />
+              </Link>
+              <Link href="#" aria-label="LinkedIn">
+                <Linkedin className="h-4 w-4 text-gray-400 hover:text-white" />
+              </Link>
+              <Link href="#" aria-label="YouTube">
+                <Youtube className="h-4 w-4 text-gray-400 hover:text-white" />
+              </Link>
             </div>
           </div>
-
-          {/* Bottom Footer */}
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-4 border-t">
-            <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-              <span>© 2004-{new Date().getFullYear()} Antalya Homes®</span>
-              <Link href="/legal" className="hover:text-blue-600">
-                {t("legalNotice")}
-              </Link>
-              <Link href="/terms" className="hover:text-blue-600">
-                {t("termsOfUse")}
-              </Link>
-              <Link href="/privacy" className="hover:text-blue-600">
-                {t("privacyPolicy")}
-              </Link>
-              <Link href="/cookies" className="hover:text-blue-600">
-                {t("cookiePolicy")}
-              </Link>
-            </div>
-
-            <div className="flex items-center gap-8">
-              {/* Contact */}
-              <div className="text-center">
-                <div className="text-sm text-gray-600 mb-1">{t("callUs")}</div>
-                <div className="font-semibold">+90 242 324 54 94</div>
-              </div>
-
-              {/* Social Media */}
-              <div className="flex gap-4">
-                <a
-                  href="https://facebook.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-blue-600"
-                >
-                  <Facebook className="w-5 h-5" />
-                </a>
-                <a
-                  href="https://instagram.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-pink-600"
-                >
-                  <Instagram className="w-5 h-5" />
-                </a>
-                <a
-                  href="https://linkedin.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-blue-700"
-                >
-                  <Linkedin className="w-5 h-5" />
-                </a>
-                <a
-                  href="https://twitter.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-blue-400"
-                >
-                  <Twitter className="w-5 h-5" />
-                </a>
-                <a
-                  href="https://youtube.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-red-600"
-                >
-                  <Youtube className="w-5 h-5" />
-                </a>
-              </div>
-
-              {/* Logo */}
-              <Link href="/" className="flex-shrink-0">
-                <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-KT1y5T9J1vbWZEQgE8O68AiAunU7MH.png"
-                  alt="Tekce Logo"
-                  width={120}
-                  height={40}
-                  className="h-8 w-auto"
-                />
-              </Link>
-            </div>
+          <div>
+            <Link href="https://itecke.com" target="_blank" rel="noopener noreferrer">
+              <Image src="/placeholder.svg?height=30&width=80" alt="iTecke" width={80} height={30} />
+            </Link>
           </div>
         </div>
       </div>

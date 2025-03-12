@@ -1,15 +1,21 @@
 import './globals.css'
 import { Inter } from "next/font/google"
 import { Suspense } from 'react'
+import type { Metadata } from "next"
+import { AuthProvider } from "@/contexts/AuthContext"
+import { Toaster } from "@/components/ui/toaster"
 
 // Import the client layout directly for type checking
 import ClientLayoutComponent from "@/components/client-layout"
+import { Footer } from "@/components/Footer"
+import { Navbar } from "@/components/navbar"
+import { LanguageProvider } from "@/contexts/LanguageContext"
 
 const inter = Inter({ subsets: ["latin"] })
 
-export const metadata = {
-  title: "TurqaEstate - Turkish Real Estate",
-  description: "Find your dream property in Turkey with TurqaEstate, the leading real estate company in the Turkish Riviera.",
+export const metadata: Metadata = {
+  title: "Turqa Estate - Luxury Real Estate in Turkey",
+  description: "Find your dream luxury property in Turkey with Turqa Estate.",
 }
 
 export const viewport = {
@@ -33,9 +39,14 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <body className={`${inter.className} flex flex-col min-h-full`}>
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
-          <ClientLayout>{children}</ClientLayout>
-        </Suspense>
+        <AuthProvider>
+          <LanguageProvider>
+            <Navbar />
+            <main>{children}</main>
+            <Footer />
+            <Toaster />
+          </LanguageProvider>
+        </AuthProvider>
       </body>
     </html>
   )
